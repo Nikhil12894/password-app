@@ -13,9 +13,9 @@ env:
   DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
 
   # Target repo configuration
-  TARGET_REPO: Nikhil12894/password-app
+  TARGET_REPO: password-app
   TARGET_BRANCH: main
-  YAML_FILE_PATH: password-app/k8s/deployment.yaml
+  YAML_FILE_PATH: k8s/deployment.yaml
   COMMITTER_NAME: github-actions
   COMMITTER_EMAIL: github-actions@github.com
 
@@ -49,14 +49,17 @@ jobs:
       - name: Checkout target repo
         uses: actions/checkout@v4
         with:
-          repository: ${{ env.TARGET_REPO }}
+          repository: Nikhil12894/${{ env.TARGET_REPO}}
           path: target-repo
           token: ${{ secrets.PAT_TOKEN }}
 
       # Update the YAML file with the new image tag
       - name: Update deployment YAML
+        working-directory: ./target-repo
         run: |
-          cd target-repo
+          # Verify file exists
+          ls -la
+          ls -la k8s/
           # Use sed to replace the image tag in the YAML file
           # This assumes your YAML has a line like: image: username/repo:tag
           sed -i "s|image: $DOCKER_REGISTRY/$DOCKER_USERNAME/$DOCKER_IMAGE_NAME:.*|image: $DOCKER_REGISTRY/$DOCKER_USERNAME/$DOCKER_IMAGE_NAME:$GITHUB_SHA|" $YAML_FILE_PATH
