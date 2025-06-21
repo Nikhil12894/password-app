@@ -63,12 +63,16 @@ jobs:
           # Use sed to replace the image tag in the YAML file
           # This assumes your YAML has a line like: image: username/repo:tag
           sed -i "s|image: $DOCKER_REGISTRY/$DOCKER_USERNAME/$DOCKER_IMAGE_NAME:.*|image: $DOCKER_REGISTRY/$DOCKER_USERNAME/$DOCKER_IMAGE_NAME:$GITHUB_SHA|" $YAML_FILE_PATH
+      - name: Configure Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-          # Configure git
-          git config --global user.name "$COMMITTER_NAME"
-          git config --global user.email "$COMMITTER_EMAIL"
-
-          # Commit and push changes
-          git add $YAML_FILE_PATH
-          git commit -m "Update $DOCKER_IMAGE_NAME image to $GITHUB_SHA [skip ci]"
-          git push origin $TARGET_BRANCH
+      - name: Commit and push changes
+        run: |
+          cd target-repo
+          git add .
+          git commit -m "Add/updated generated YAML file ${{ github.event.repository.name }} with run ${{github.run_number}} ${{github.run_id}}"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
