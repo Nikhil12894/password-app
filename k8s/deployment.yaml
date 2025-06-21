@@ -15,7 +15,7 @@ spec:
       automountServiceAccountToken: false
       containers:
       - name: password-generator
-        image: docker.io/nikhil12894/password-generator-app:3ace7747807b29ce93281eda82bc7f1477ed3592
+        image: docker.io/nikhil12894/password-generator-app:004981831529923c70c4723abaf32a5f5a6eb030
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 80
