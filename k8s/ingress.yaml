@@ -27,7 +27,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   annotations:
-    kubernetes.io/ingress.class: public
+    # kubernetes.io/ingress.class: public
     cert-manager.io/cluster-issuer: lets-encrypt-prod
   labels:
     app: password-generator
@@ -50,4 +50,4 @@ spec:
   tls:
   - hosts:
     - lpassword.explorewithnk.com
-    secretName: password-generator-ingress-1
+    secretName: password-generator-ingress
