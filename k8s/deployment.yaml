@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: password-generator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: password-generator
+  template:
+    metadata:
+      labels:
+        app: password-generator
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - name: password-generator
+        image: docker.io/nikhil12894/password-generator-app:1.0.0
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+            ephemeral-storage: "20Mi" # Add this line
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+            ephemeral-storage: "100Mi"
+        volumeMounts:
+        - name: data
+          mountPath: /data
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: password-generator-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: password-generator-pvc
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Mi
+    limits:
+      storage: 200Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: password-generator-service
+spec:
+  selector:
+    app: password-generator
+  ports:
+  - port: 80
+    targetPort: 80
+  type: ClusterIP

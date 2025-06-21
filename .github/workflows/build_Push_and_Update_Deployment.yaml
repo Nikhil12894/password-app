@@ -1,0 +1,71 @@
+name: Build, Push, and Update Deployment
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  # Docker configuration
+  DOCKER_IMAGE_NAME: password-generator-app
+  DOCKER_REGISTRY: docker.io # or ghcr.io for GitHub Container Registry
+  DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+  DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+
+  # Target repo configuration
+  TARGET_REPO: https://github.com/nikhil12894/password-app.git
+  TARGET_BRANCH: main
+  YAML_FILE_PATH: password-app/k8s/deployment.yaml
+  COMMITTER_NAME: github-actions
+  COMMITTER_EMAIL: github-actions@github.com
+
+jobs:
+  build-and-update:
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout the current repo
+      - name: Checkout current repo
+        uses: actions/checkout@v4
+
+      # Login to Docker registry
+      - name: Login to Docker Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.DOCKER_REGISTRY }}
+          username: ${{ env.DOCKER_USERNAME }}
+          password: ${{ env.DOCKER_PASSWORD }}
+
+      # Build and push Docker image
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:latest
+            ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }}
+
+      # Checkout the target repo
+      - name: Checkout target repo
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.TARGET_REPO }}
+          path: target-repo
+          token: ${{ secrets.PAT_TOKEN }}
+
+      # Update the YAML file with the new image tag
+      - name: Update deployment YAML
+        run: |
+          cd target-repo
+          # Use sed to replace the image tag in the YAML file
+          # This assumes your YAML has a line like: image: username/repo:tag
+          sed -i "s|image: $DOCKER_REGISTRY/$DOCKER_USERNAME/$DOCKER_IMAGE_NAME:.*|image: $DOCKER_REGISTRY/$DOCKER_USERNAME/$DOCKER_IMAGE_NAME:$GITHUB_SHA|" $YAML_FILE_PATH
+
+          # Configure git
+          git config --global user.name "$COMMITTER_NAME"
+          git config --global user.email "$COMMITTER_EMAIL"
+
+          # Commit and push changes
+          git add $YAML_FILE_PATH
+          git commit -m "Update $DOCKER_IMAGE_NAME image to $GITHUB_SHA [skip ci]"
+          git push origin $TARGET_BRANCH
