@@ -1,23 +1,53 @@
+# apiVersion: networking.k8s.io/v1
+# kind: Ingress
+# metadata:
+#   name: password-generator-ingress
+#   annotations:
+#     nginx.ingress.kubernetes.io/rewrite-target: /
+#     cert-manager.io/cluster-issuer: lets-encrypt-prod
+# spec:
+#   tls:
+#   - hosts:
+#     - password.explorewithnk.com
+#     secretName: password-generator-tls
+#   rules:
+#   - host: password.explorewithnk.com
+#     http:
+#       paths:
+#       - path: /
+#         pathType: Prefix
+#         backend:
+#           service:
+#             name: password-generator-service
+#             port:
+#               number: 80
+
+
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: password-generator-ingress
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
-    cert-manager.io/cluster-issuer: letsencrypt-prod
+    kubernetes.io/ingress.class: public
+    cert-manager.io/cluster-issuer: lets-encrypt-prod
+  labels:
+    app: password-generator-app
+    version: 1.0.0
+  name: password-generator-ingress-1
+  namespace: default
 spec:
-  tls:
-  - hosts:
-    - password.explorewithnk.com
-    secretName: password-generator-tls
+  ingressClassName: public
   rules:
   - host: password.explorewithnk.com
     http:
       paths:
-      - path: /
-        pathType: Prefix
-        backend:
+      - backend:
           service:
             name: password-generator-service
             port:
               number: 80
+        path: /
+        pathType: Prefix
+  tls:
+  - hosts:
+    - lpassword.explorewithnk.com
+    secretName: password-generator-ingress-1
