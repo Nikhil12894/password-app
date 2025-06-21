@@ -13,7 +13,7 @@ env:
   DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
 
   # Target repo configuration
-  TARGET_REPO: https://github.com/nikhil12894/password-app.git
+  TARGET_REPO: https://github.com/Nikhil12894/password-app.git
   TARGET_BRANCH: main
   YAML_FILE_PATH: password-app/k8s/deployment.yaml
   COMMITTER_NAME: github-actions
