@@ -30,7 +30,7 @@ metadata:
     kubernetes.io/ingress.class: public
     cert-manager.io/cluster-issuer: lets-encrypt-prod
   labels:
-    app: password-generator-app
+    app: password-generator
     version: 1.0.0
   name: password-generator-ingress-1
   namespace: default
