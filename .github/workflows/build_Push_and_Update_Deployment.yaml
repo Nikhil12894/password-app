@@ -51,7 +51,7 @@ jobs:
         with:
           repository: Nikhil12894/${{ env.TARGET_REPO}}
           path: target-repo
-          token: ${{ secrets.PAT_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       # Update the YAML file with the new image tag
       - name: Update deployment YAML
